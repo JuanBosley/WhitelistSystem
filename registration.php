@@ -2,7 +2,9 @@
 include ('includes/db_connect.php');
 $config = parse_ini_file('includes/config.ini.php', 1, true);
 require_once('phpmailer/PHPMailerAutoload.php');
+require_once('includes/function_mail.php');
 $captcha;
+$bool_sendmail = $config['minecraft']['sendmail'];
 
 if(isset($_POST['g-recaptcha-response'])){
           $captcha=$_POST['g-recaptcha-response'];
@@ -11,23 +13,18 @@ if(isset($_POST['g-recaptcha-response'])){
           echo '<h2>Please check the the captcha form.</h2>';
           exit;
         }
+        
         $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=SECRETKEYHERE&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']);
         if($response.success==false)
         {
           echo '<h2>You are spammer ! Get the @$%K out</h2>';
-        }else
-        {
-		// Create connection
-		$conn = new mysqli($host, $user, $pass, $db);
-		// Check connection
-		if ($conn->connect_error) {
-			die("Connection failed: " . $conn->connect_error);
-		} 
-
+          die();
+        }
 $username=$_POST['username'];
 $email=$_POST['email'];
 $age=$_POST['age'];
 $comment=$_POST['comment'];
+$approved = "0";
 
 //Notification EMAIL Message
 $address = "mcadmins@icarey.net";  //Address to send new register notifications to.
@@ -48,53 +45,32 @@ $message .= "Minecraft User - $username<br>";
 $message .= "Email - $email<br>";
 $message .= "Age - $age<br>";
 $message .= "Description - $comment<hr>";
-
 //END Notification EMAIL Message
 		
-$sql = "INSERT INTO whitelist (username, age, email, comment, approved)
-VALUES ('$username', '$age', '$email', '$comment', '0')";
+//We should already be connected to DB via PDO - Otherwise it should've thrown an error by now
 
-if ($conn->query($sql) === TRUE) {
-	
-//Notification EMAIL SEND	
-	$config = parse_ini_file('includes/config.ini.php', 1, true);
-	$mail             = new PHPMailer();
-	$body             = $message;
-	$mail->IsSMTP(); // telling the class to use SMTP
-	$mail->Host       = $config['email']['host']; // SMTP server
-	$mail->SMTPDebug  = 0;                 // enables SMTP debug information (for testing)
-                                           // 1 = errors and messages
-                                           // 2 = messages only
-    $mail->SMTPAuth   = true;                  // enable SMTP authentication
-	$mail->Host       = $config['email']['host']; // sets the SMTP server
-	$mail->Port       = $config['email']['port'];                    // set the SMTP port for the server
-	$mail->Username   = $config['email']['username']; // SMTP account username
-	$mail->Password   = $config['email']['password'];        // SMTP account password
-	
-	$mail->SetFrom($config['email']['from'], $config['email']['fromname']); //FROM
-	
-	$mail->AddReplyTo($config['email']['reply'], $config['email']['replyname']); //REPLY TO
-	
-	$mail->Subject    = $subject;
-	
-	$mail->AltBody    = "To view the message, please use an HTML compatible email viewer!"; // optional, Alternate Body for those who can't view HTML mail.
-	
-	$mail->MsgHTML($body);
-	
-	$mail->AddAddress($address, "McAdmins"); 
-	
-	if(!$mail->Send()) {
-	echo "Mailer Error: " . $mail->ErrorInfo;
-	} else {
-	  echo '<script type="text/javascript">window.alert("Thanks for your registration! Your registration will be reviewed soon."); window.location.href = "https://mc.icarey.net"</script>';  //Edit this address to your website
+$sql = "INSERT INTO whitelist (username, age, email, comment, approved) VALUES (:username,:age,:email,:comment,:approved)";
+$prep = $dbh->prepare($sql); //prepare PDO
+//prep the strings/ints
+$prep->bindparam(":username",$username,PDO::PARAM_STR);
+$prep->bindparam(":age",$age,PDO::PARAM_INT);
+$prep->bindparam(":email",$email,PDO::PARAM_STR);
+$prep->bindparam(":comment",$comment,PDO::PARAM_STR);
+$prep->bindparam(":approved",$approved,PDO::PARAM_INT); //[1] 
+$prep->execute();
+$c = count($prep->rowcount()); //Check if the query was successfull or not - 1 = yes, 0 = no
+if($c == "1")
+{
+	//Success
+	if($bool_sendmail == "true")
+	{
+		SendMailNotification($message,$subject,$address);
+		echo "<p>Success! Your application will be processed shortly.</p>";
 	}
-	
-		
-} else {
-    echo "Error: " . $sql . "<br>" . $conn->error;
+	else
+	{
+		echo "<p>Success! Your Application will be processed shortly.</p>";
+	}
 }
-//END Email SEND		
-$conn->close();
-
-		}
+	
 ?>
