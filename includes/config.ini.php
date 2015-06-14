@@ -11,14 +11,14 @@ rport = 25555
 rpass = RCONPASSWORD
 apaneluser = admin
 apanelpass = adminpanelpassword
-sendmail = "true"
+sendmail = "false"
 
 [mysql]
 user=minecraft
 password=SQLPASSWORD
 host=localhost
 port=3306
-database=minecraft
+database=YourDB
 
 [email]
 username = whitelist@icarey.net
