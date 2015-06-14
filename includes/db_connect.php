@@ -11,7 +11,10 @@ $user=$config['mysql']['user'];
 $pass=$config['mysql']['password'];
 $db=$config['mysql']['database'];
 
-
-$connect = mysql_connect($host,$user,$pass)or die("Could not connect to MySQL host.");
-$select = mysql_selectdb($db) or die("Could not select database..");
+//Implement PDO - This gives users options between MySQL, MySQLi ... 
+$dbh = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+if(!$dbh)
+{
+	die('Unable to connect to DB');
+}
 ?>
