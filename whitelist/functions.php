@@ -4,15 +4,31 @@ $config = parse_ini_file('../includes/config.ini.php', 1, true);
 include_once("rcon.php");
 require_once('../phpmailer/PHPMailerAutoload.php');
 
-$query = "SELECT * from whitelist WHERE approved='0'";
-$selectunsolved = mysql_query($query);
-if (!$selectunsolved)
+/*
+Why do we need duplicates in index.php and below?
+$zero = "0";
+$query = "SELECT * from whitelist WHERE approved=:zero";
+$prep = $dbh->prepare($query);
+$prep->bindparam(":zero", $zero,PDO::PARAM_INT);
+$prep->execute();
+$c = count($prep->fetchall());
+if($c > "0")
 {
-    echo "Failed to select.";
+    
 }
+*/
 function Approve($id, $wsip, $wspass, $wsport, $to, $enabled)
 {
-    mysql_query("UPDATE whitelist SET approved=1 WHERE id='$id'");
+    global $dbh; $one = "1";
+    $sql = "UPDATE whitelist SET approved=:one WHERE id=:id";
+    $prep = $dbh->prep($sql);
+    $prep->bindparam(":one",$one,PDO::PARAM_INT);
+    $prep->bindparam(":id",$id,PDO::PARAM_INT);
+    $prep->execute();
+    if($prep->rowcount() == "0")
+    {
+        die("<p>Error! Functions.php Line 30");
+    }
     $username = mysql_query("SELECT * FROM whitelist WHERE id='$id'");
     while ($row = mysql_fetch_assoc($username)){
         $userign = $row['username'];
