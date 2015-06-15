@@ -1,19 +1,72 @@
 <?php
 include ('../includes/db_connect.php');
 $config = parse_ini_file('../includes/config.ini.php', 1, true);
+
+//already logged in?
+if(isset($_SESSION['apaneluser']))
+{
+	echo header('location: index.php');
+	echo '<p><a href="index.php">You are already logged in!</a></p>';
+	die();
+}
+//End logged-in check
+
+//Begin processing request
 if(isset($_POST['submit']))
 {
-    if ($_POST['apaneluser'] == $config['minecraft']['apaneluser'] && $_POST['apanelpass'] == $config['minecraft']['apanelpass'])
-    {
-        $_SESSION['apaneluser'] = $config['minecraft']['apaneluser'];
-        header('Location: index.php');
-    }
-    else
-    {
-        echo "Wrong account credentials!\n";
-        header('Location: login.php');
-    }
-}
+	$user = htmlentities($_POST['apaneluser']); 
+	$pass = htmlentities($_POST['apanelpass']);
+	$b_isactive="1"; //Remember we can't pass stuff directly to PDO. It has to be done via $vars.
+	
+	//Lazy form validation
+	foreach($_POST as $p)
+	{
+		//Lazy field validation - Cycle all fields. versus multiple IF's.
+		if(empty($p))
+		{
+			die('<p><a href="login.php">Please go back and fill in all fields.</a></p>');
+		}
+	}
+	//End lazy form validation
+
+	//Implement multi-user login.
+	
+	//Prep the DB and select the record
+	$sql = "SELECT * FROM tbl_users WHERE username= :username AND isactive=:bisactive LIMIT 0,1";
+	$options = array("cost"=>$config['bcrypt']['cost']);
+	$prep = $dbh->prepare($sql);
+	$prep->bindparam(":username",$user,PDO::PARAM_STR);
+	$prep->bindparam(":bisactive",$b_isactive,PDO::PARAM_INT);
+	$prep->execute();
+	//End prep and selecting record 
+
+	//Has the record been found?
+	$c = $prep->rowcount();
+	if($c == "0")
+	{
+		//No such user/error
+		die('<p>Error! User was not found.</p>');
+	}
+	//End
+	//Begin - User has been found
+	else
+	{
+		echo 'Success';
+		//Fetch the ID
+		foreach($prep->fetchall() as $res)
+		{
+			$db_id =  $res['userid'];
+		}
+		echo "Your DB id is $db_id";
+		$_SESSION['apaneluser'] = $db_id;
+		echo header('location:index.php');
+		echo '<p><a href="index.php">You are logged in!</a></p>';
+	}
+	//End - User has been found
+
+} //End isset($_POST)
+
+//Begin - Form !isset
 else
 {
 ?>
@@ -126,5 +179,5 @@ else
 </html>
 
 <?php
-}
+} //End !isset($_POST)
 ?>
