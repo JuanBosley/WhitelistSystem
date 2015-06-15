@@ -1,5 +1,5 @@
 
-<?php 
+<?php
 include ('../includes/db_connect.php');
 $config = parse_ini_file('../includes/config.ini.php', 1, true);
 include ('functions.php');
@@ -107,7 +107,7 @@ else
 <?php
 if (isset($_GET['notice']))
 {
-  $notice = $_GET['notice'];
+  $notice =  htmlentities($_GET['notice']);
   echo '<div class="alert alert-success" role="alertsucess">';
   echo '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ';
   echo '<span class="sr-only">Error:</span>';
@@ -117,10 +117,10 @@ if (isset($_GET['notice']))
 }
         if (isset($_GET['approved']))
         {
-            $res = $_GET['approved'];
-            $id = $_GET['id'];
-			$mail = $_GET['email'];
-			$user = $_GET['userign'];
+            $res = htmlentities($_GET['approved']);
+            $id = htmlentities($_GET['id']);
+			$mail = htmlentities($_GET['email']);
+			$user = htmlentities($_GET['userign']);
             if ($res == "1")
             {
                 Approve($id, $config['minecraft']['ip'], $config['minecraft']['rpass'], $config['minecraft']['rport'], $mail, $config['minecraft']['sendmail']);
@@ -142,8 +142,9 @@ if (isset($_GET['notice']))
   echo '</div>';
             }
         }
-        if ($db)
+        if ($dbh)
         {
+        	//Left blank - Will let you continue with this.
 
         }
         else
@@ -166,25 +167,35 @@ if (isset($_GET['notice']))
 		<div class="col-md-12">
 
 <?php
-            $select = "SELECT * FROM whitelist WHERE approved='0'";
-            $result = mysql_query($select);
-            while ($row = mysql_fetch_assoc($result)){
-			if ($row > 0)
-			{
-			   echo '<div class="well">';
-			}
-            $userid = $row['id'];
-			$userign = $row['username'];
-            $comment = $row['comment'];
-            $text = $comment;
-			$email = $row['email'];
-			echo '<table class="table">';
-			echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th><th>Reddit!</th></tr></thead>';
-			echo '<tbody> <tr> <td>' . $row['username'] . '</td><td>' . $row['age'] . '</td><td>' . $row['email'] . '</td><td>' . $row['reddit'] . '</td></tr> </tbody>';
-			echo '</table>';
-			echo '<div class="well">' . $text . '</div>';
-			echo '<center><a href="index.php?approved=1&id='.$userid.'&email='.$email.'&userign='.$userign.'"><button class="btn-success">Approve</button></a>    <a href="index.php"><button class="btn-warning">Check Bans</button></a><a href="index.php?approved=2&id='.$userid.'&email='.$email.'"><button class="btn-danger">Decline</button></a><center>';
-			echo '</div>';
+			//Convert to PDO
+			$zero = "0";
+            $select = "SELECT * FROM whitelist WHERE approved=:zero";
+            $prep = $dbh->prepare($select);
+            $prep->bindparam(":zero",$zero,PDO::PARAM_INT);
+            $prep->execute();
+            $c = $prep->rowcount();
+            if($c == "0")
+            {
+            	echo '<div class="well">';
+            	echo "No applications found";//Might want to put this in a proper <div>
+            	echo '</div>';
+            }
+            
+            foreach($prep->fetchall() as $row)
+            {
+            	echo '<div class="well">';
+            	$userid = $row['id'];
+				$userign = $row['username'];
+	            $comment = $row['comment'];
+	            $email = $row['email'];
+	            $text = $comment;
+	            echo '<table class="table">';
+				echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th><th>Reddit!</th></tr></thead>';
+				echo '<tbody> <tr> <td>' . $row['username'] . '</td><td>' . $row['age'] . '</td><td>' . $row['email'] . '</td><td>' . $row['reddit'] . '</td></tr> </tbody>';
+				echo '</table>';
+				echo '<div class="well">' . $text . '</div>';
+				echo '<center><a href="index.php?approved=1&id='.$userid.'&email='.$email.'&userign='.$userign.'"><button class="btn-success">Approve</button></a>    <a href="index.php"><button class="btn-warning">Check Bans</button></a><a href="index.php?approved=2&id='.$userid.'&email='.$email.'"><button class="btn-danger">Decline</button></a><center>';
+				echo '</div>';
             }
 ?>	
 	</div>
