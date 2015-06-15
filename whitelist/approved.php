@@ -9,6 +9,7 @@ if(isset($_SESSION['apaneluser']))
 else
 {
     header('Location: login.php');
+    die('<p><a href="login.php">Login to continue</a></p>'); //I've found sometimes header redirect doesn't work.
 }
 ?>
 
