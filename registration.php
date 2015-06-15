@@ -1,34 +1,53 @@
 <?php
+//User has submitted whitelist.php - This gets called
+
+//Lazy form validation
+foreach($_POST as $p)
+{
+	//Lazy field validation - Cycle all fields. versus multiple IF's.
+	if(empty($p))
+	{
+		die('<p><a href="whitelist.php">Please go back and fill in all fields.</a></p>');
+	}
+}
+//End lazy form validation
+
 include ('includes/db_connect.php');
 $config = parse_ini_file('includes/config.ini.php', 1, true);
 require_once('phpmailer/PHPMailerAutoload.php');
 require_once('includes/function_mail.php');
 $captcha;
-$bool_sendmail = $config['minecraft']['sendmail'];
+$b_sendmail = $config['minecraft']['sendmail'];
 
-if(isset($_POST['g-recaptcha-response'])){
-          $captcha=$_POST['g-recaptcha-response'];
-        }
-        if(!$captcha){
-          echo '<h2>Please check the the captcha form.</h2>';
-          exit;
-        }
-        
-        $response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=SECRETKEYHERE&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']);
-        if($response.success==false)
-        {
-          echo '<h2>You are spammer ! Get the @$%K out</h2>';
-          die();
-        }
-$username=$_POST['username'];
-$email=$_POST['email'];
-$age=$_POST['age'];
-$comment=$_POST['comment'];
+/*
+if(isset($_POST['g-recaptcha-response']))
+{
+  $captcha=$_POST['g-recaptcha-response'];
+}
+else
+{
+  die('<h2>Please check the the captcha form.</h2>');
+}
+$response=file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=SECRETKEYHERE&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']);
+if($response.success==false)
+{
+  echo '<h2>You are spammer ! Get the @$%K out</h2>';
+  die();
+}
+*/
+
+//Params for the DB
+$username=htmlentities($_POST['username']); //Found out that whilst PDO is SQLi proof- It's not XSS proof.
+$email=htmlentities($_POST['email']); //Don't worry we'll use htmlentities_decode later
+$age=htmlentities($_POST['age']);
+$comment=htmlentities($_POST['comment']);
 $approved = "0";
+//End params for the DB
+
+//Begin email construction
 
 //Notification EMAIL Message
 $address = "mcadmins@icarey.net";  //Address to send new register notifications to.
-
 $subject = "iCarey.net Whitelist New Registration"; //SUBJECT
 
 //Message in HTML format.
@@ -45,10 +64,11 @@ $message .= "Minecraft User - $username<br>";
 $message .= "Email - $email<br>";
 $message .= "Age - $age<br>";
 $message .= "Description - $comment<hr>";
-//END Notification EMAIL Message
-		
-//We should already be connected to DB via PDO - Otherwise it should've thrown an error by now
+//End email construction
 
+//Begin inserting into the DB
+
+//We should already be connected to DB via PDO - Otherwise it should've thrown an error by now
 $sql = "INSERT INTO whitelist (username, age, email, comment, approved) VALUES (:username,:age,:email,:comment,:approved)";
 $prep = $dbh->prepare($sql); //prepare PDO
 //prep the strings/ints
@@ -58,7 +78,10 @@ $prep->bindparam(":email",$email,PDO::PARAM_STR);
 $prep->bindparam(":comment",$comment,PDO::PARAM_STR);
 $prep->bindparam(":approved",$approved,PDO::PARAM_INT); //[1] 
 $prep->execute();
-$c = count($prep->rowcount()); //Check if the query was successfull or not - 1 = yes, 0 = no
+//End inserting into the DB
+
+//Begin checking if record was inserted
+$c = $prep->rowcount(); //Check if the query was successfull or not - 1 = yes, 0 = no
 if($c == "1")
 {
 	//Success
@@ -72,5 +95,6 @@ if($c == "1")
 		echo "<p>Success! Your Application will be processed shortly.</p>";
 	}
 }
+//End insertion check
 	
 ?>
