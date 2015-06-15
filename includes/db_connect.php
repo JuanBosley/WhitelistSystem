@@ -4,7 +4,7 @@
  * https://www.icarey.net/minecraft
  */
 $config = parse_ini_file('config.ini.php', 1, true);
-session_start();
+@session_start();
 
 $host=$config['mysql']['host'];
 $user=$config['mysql']['user'];
