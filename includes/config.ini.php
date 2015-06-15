@@ -9,16 +9,14 @@ port = 25565
 qport = 25565
 rport = 25555
 rpass = RCONPASSWORD
-apaneluser = admin
-apanelpass = adminpanelpassword
 sendmail = "false"
 
 [mysql]
-user=minecraft
-password=SQLPASSWORD
+user=root
+password=
 host=localhost
 port=3306
-database=YourDB
+database=whitelist_test
 
 [email]
 username = whitelist@icarey.net
@@ -29,3 +27,6 @@ from = whitelist@icarey.net
 fromname = Whitelist
 reply = mcadmins@icarey.net
 replyname = Admins
+
+[bcrypt]
+cost = 12
