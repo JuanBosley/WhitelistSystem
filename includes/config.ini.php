@@ -30,3 +30,8 @@ replyname = Admins
 
 [bcrypt]
 cost = 12
+
+[website]
+domain = http://localhost/
+website_name = Test
+recaptcha_key = "YOUR KEY HERE"

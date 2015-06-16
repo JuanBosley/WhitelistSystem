@@ -20,12 +20,12 @@ else
 
 	<head>
 		 
-		<title>Whitelist Registration | iCarey.net</title>
+		<title>Whitelist Registration | <?php echo $config['website']['website_name'];?></title>
 		<meta http-equiv="content-type" content="text/html" />
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="author" content="Ian Carey">
-		<meta name="description" content="iCarey.net Survival Minecraft Server">
+		<meta name="description" content="<?php echo $config['website']['website_name'];?> Survival Minecraft Server">
 		<meta name="keywords" content="">
 		
 		<!-- Favicon 
@@ -159,7 +159,7 @@ if (isset($_GET['notice']))
 ?>
 <div class="row">
 		<div class="col-md-12">
-			<h1 class="pagetitle">iCarey.net Whitelist Registration</h1>
+			<h1 class="pagetitle"><?php echo $config['website']['website_name'];?> Whitelist Registration</h1>
 		</div>
 	</div>
 	<div class="row">
@@ -185,16 +185,18 @@ if (isset($_GET['notice']))
             {
             	echo '<div class="well">';
             	$userid = $row['id'];
-				$userign = $row['username'];
-	            $comment = $row['comment'];
+				$username = $row['username'];
+				$age = $row['age'];
 	            $email = $row['email'];
+	            $comment = $row['comment'];
+	            $reddit = $row['reddit'];//Added - Was not there before, causing an error.
 	            $text = $comment;
 	            echo '<table class="table">';
 				echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th><th>Reddit!</th></tr></thead>';
-				echo '<tbody> <tr> <td>' . $row['username'] . '</td><td>' . $row['age'] . '</td><td>' . $row['email'] . '</td><td>' . $row['reddit'] . '</td></tr> </tbody>';
+				echo '<tbody> <tr> <td>' . $username . '</td><td>' . $age . '</td><td>' . $email . '</td><td>' . $reddit . '</td></tr> </tbody>';
 				echo '</table>';
 				echo '<div class="well">' . $text . '</div>';
-				echo '<center><a href="index.php?approved=1&id='.$userid.'&email='.$email.'&userign='.$userign.'"><button class="btn-success">Approve</button></a>    <a href="index.php"><button class="btn-warning">Check Bans</button></a><a href="index.php?approved=2&id='.$userid.'&email='.$email.'"><button class="btn-danger">Decline</button></a><center>';
+				echo '<center><a href="index.php?approved=1&id='.$userid.'&email='.$email.'&userign='.$username.'"><button class="btn-success">Approve</button></a>    <a href="index.php"><button class="btn-warning">Check Bans</button></a><a href="index.php?approved=2&id='.$userid.'&email='.$email.'"><button class="btn-danger">Decline</button></a><center>';
 				echo '</div>';
             }
 ?>	
@@ -202,7 +204,7 @@ if (isset($_GET['notice']))
 	</div>
 <div id="footer" class="">
     <div class="container">
-        <p>iCarey.net &copy;2010-2015 - All rights reserved<a href="https://www.icarey.net" class=""> iCarey.net</a>
+        <p><?php echo $config['website']['website_name'];?> &copy;2010-2015 - All rights reserved <a href="<?php echo $config['website']['domain'];?>" class=""><?php echo $config['website']['website_name'];?></a>
         </p>
     </div>
 </div>

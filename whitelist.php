@@ -4,7 +4,7 @@
 
 	<head>
 		 
-		<title>Whitelist Registration | iCarey.net</title>
+		<title>Whitelist Registration | <?php echo $config['website']['website_name'];?></title>
 		<meta http-equiv="content-type" content="text/html" />
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -80,7 +80,7 @@
 <div class="container">
 <div class="row">
 		<div class="col-md-12">
-			<h1 class="pagetitle">iCarey.net Whitelist Registration</h1>
+			<h1 class="pagetitle"><?php echo $config['website']['website_name'];?> Whitelist Registration</h1>
 		</div>
 </div>
 	<div class="row">
@@ -94,7 +94,7 @@
 				<textarea class="forminput "name="comment" placeholder="What brought you to our server?" type="text"></textarea><br>
 				<label style="color:white; "class="formlabel"><input type="checkbox" required />I have read the server <a style="color:orange" href="#">rules</a> and I understand them!</label><br>
 				<center>
-				<div class="g-recaptcha" data-sitekey="YOUR SITE KEY HERE"></div>
+				<div class="g-recaptcha" data-sitekey="<?php echo $config['website']['recaptcha_key'];?>"></div>
 				</center>
 				<input class="formbutton" type="submit" name="submit" id="submit" value="Register"></input>
 			</form>
@@ -102,7 +102,7 @@
 	</div>
 	<div id="footer" class="">
 		<div class="container">
-			<p>iCarey.net &copy;2010-2015 - All rights reserved<a href="https://www.icarey.net" class=""> iCarey.net</a></p>
+			<p><?php echo $config['website']['website_name'];?> &copy;2010-2015 - All rights reserved<a href="<?php echo $config['website']['domain'];?>" class=""> <?php echo $config['website']['website_name'];?></a></p>
 		</div>
 	</div>
 </div>
