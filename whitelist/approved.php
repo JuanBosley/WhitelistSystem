@@ -1,7 +1,7 @@
 <?php 
 include ('../includes/db_connect.php');
 $config = parse_ini_file('../includes/config.ini.php', 1, true);
-include ('functions.php');
+include ('../includes/function_approve.php');
 if(isset($_SESSION['apaneluser']))
 {
     header('Content-type: text/html; charset=UTF-8');
@@ -18,12 +18,12 @@ else
 
 	<head>
 		 
-		<title>Whitelist Approved Users | iCarey.net</title>
+		<title>Whitelist Approved Users | <?php echo $config['website']['website_name'];?></title>
 		<meta http-equiv="content-type" content="text/html" />
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="author" content="Ian Carey">
-		<meta name="description" content="iCarey.net Survival Minecraft Server">
+		<meta name="description" content="<?php echo $config['website']['website_name'];?> Survival Minecraft Server">
 		<meta name="keywords" content="">
 		
 		<!-- Favicon 
@@ -104,20 +104,21 @@ else
 <?php
 if (isset($_GET['notice']))
 {
-  $notice = $_GET['notice'];
-  echo '<div class="alert alert-warning" role="regwarning">';
-  echo '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ';
-  echo '<span class="sr-only">Error:</span>';
-  echo '' .$notice. '';
-  echo '<a href="#" class="close" data-dismiss="alert">&times;</a></div>';
-  echo '</div>';
+	//Displays a information banner.
+	$notice = htmlentities($_GET['notice']);
+	echo '<div class="alert alert-warning" role="regwarning">';
+	echo '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ';
+	echo '<span class="sr-only">Error:</span>';
+	echo '' .$notice. '';
+	echo '<a href="#" class="close" data-dismiss="alert">&times;</a></div>';
+	echo '</div>';
 }
         if (isset($_GET['approved']))
         {
-            $res = $_GET['approved'];
-            $id = $_GET['id'];
-			$mail = $_GET['email'];
-			$user = $_GET['userign'];
+            $res = htmlentities($_GET['approved']);
+            $id = htmlentities($_GET['id']);
+			$mail = htmlentities($_GET['email']);
+			$user = htmlentities($_GET['userign']);
             if ($res == "1")
             {
                 Approve($id, $config['minecraft']['ip'], $config['minecraft']['rpass'], $config['minecraft']['rport'], $mail, $config['minecraft']['sendmail']);
@@ -139,9 +140,12 @@ if (isset($_GET['notice']))
   echo '</div>';
             }
         }
-        if ($db)
+        /*
+        A bit late now to check if we're connected to the DB. 
+        If approve or deny fails - It will error inside it's function
+        if(!$db)
         {
-
+	
         }
         else
         {
@@ -152,33 +156,44 @@ if (isset($_GET['notice']))
   echo '<a href="#" class="close" data-dismiss="alert">&times;</a>';
   echo '</div>';
         }
+        */
 ?>
 
 <div class="row">
 		<div class="col-md-8">
-			<h1 class="pagetitle">iCarey.net Whitelist Approved Users</h1>
+			<h1 class="pagetitle"><?php echo $config['website']['website_name'];?> Whitelist Approved Users</h1>
 		</div>
 	</div>
 	<div class="row">
 <!-- Approved User List Column -->
 		<div class="col-md-8">
 <?php
-            $select = "SELECT * FROM whitelist WHERE approved='1'";
-            $result = mysql_query($select);
-            while ($row = mysql_fetch_assoc($result)){
-            $userid = $row['id'];
-			$userign = $row['username'];
-            $comment = $row['comment'];
-			$mail = $row['email'];
-            $text = $comment;
-			echo '<div class="well">';
-			echo '<table class="table">';
-			echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th> </tr></thead>';
-			echo '<tbody> <tr> <td>' . $row['username'] . '</td><td>' . $row['age'] . '</td><td>' . $row['email'] . '</td></tr> </tbody>';
-			echo '</table>';
-			echo '<div class="well">' . $text . '</div>';
-			echo '<center><a href="index.php?approved=2&id='.$userid.'&email='.$mail.'&userign='.$userign.'"><button class="btn-danger">Remove from whitelist!</button></a>';
-			echo '</div>';
+			$one = "1";
+            $select = "SELECT * FROM whitelist WHERE approved=:one";
+            $prep = $dbh->prepare($select);
+            $prep->bindparam(":one",$one,PDO::PARAM_INT);
+            $prep->execute();
+            if($prep->rowcount() == "0")
+            {
+            	echo '<p>No approved users...Approve one?</p>';
+            	die();
+            }
+            foreach($prep->fetchall() as $row)
+            {
+            	$userid = $row['id'];
+				$userign = $row['username'];
+				$age = $row['age'];
+	            $comment = $row['comment'];
+				$email = $row['email'];
+	            //Redundant? $text = $comment;
+	            echo '<div class="well">';
+				echo '<table class="table">';
+				echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th> </tr></thead>';
+				echo '<tbody> <tr> <td>' . $userign . '</td><td>' . $age . '</td><td>' . $email . '</td></tr> </tbody>';
+				echo '</table>';
+				echo '<div class="well">' . $comment . '</div>';
+				echo '<center><a href="index.php?approved=2&id='.$userid.'&email='.$email.'&userign='.$userign.'"><button class="btn-danger">Remove from whitelist!</button></a>';
+				echo '</div>';
             }
 ?>
 	</div>
@@ -191,7 +206,7 @@ if (isset($_GET['notice']))
 	</div>
 <div id="footer" class="">
     <div class="container">
-        <p>iCarey.net &copy;2010-2015 - All rights reserved<a href="https://www.icarey.net" class=""> iCarey.net</a>
+        <p><?php echo $config['website']['website_name'];?> &copy;2010-2015 - All rights reserved<a href="<?php echo $config['website']['website_name'];?>" class=""> <?php echo $config['website']['website_name'];?></a>
         </p>
     </div>
 </div>
