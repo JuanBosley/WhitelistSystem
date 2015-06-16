@@ -1,8 +1,7 @@
 <?php
 //User has submitted whitelist.php - This gets called
-
 //Lazy form validation
-foreach($_POST as $p)
+foreach($_POST as $p=>$v)
 {
 	//Lazy field validation - Cycle all fields. versus multiple IF's.
 	if(empty($p))
@@ -17,9 +16,12 @@ $config = parse_ini_file('includes/config.ini.php', 1, true);
 require_once('phpmailer/PHPMailerAutoload.php');
 require_once('includes/function_mail.php');
 $captcha;
-$b_sendmail = $config['minecraft']['sendmail'];
+$bool_sendmail = $config['minecraft']['sendmail'];
 
 /*
+Disabled for now - Not because it doesn't work, but effort just to get a KEY.
+Not worth it during devving and testing
+
 if(isset($_POST['g-recaptcha-response']))
 {
   $captcha=$_POST['g-recaptcha-response'];
