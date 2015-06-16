@@ -1,4 +1,8 @@
+<?php
+include ('includes/db_connect.php');
+$config = parse_ini_file('includes/config.ini.php', 1, true);
 
+?>
 <!DOCTYPE html>
 <html lang='en'>
 
