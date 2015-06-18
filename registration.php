@@ -10,7 +10,6 @@ foreach($_POST as $p=>$v)
 	}
 }
 //End lazy form validation
-
 include ('includes/db_connect.php');
 $config = parse_ini_file('includes/config.ini.php', 1, true);
 require_once('phpmailer/PHPMailerAutoload.php');
