@@ -1,7 +1,8 @@
 <?php 
 include ('../includes/db_connect.php');
 $config = parse_ini_file('../includes/config.ini.php', 1, true);
-include ('functions.php');
+include('../functions/function_approve.php');
+include('../functions/function_deny.php');
 if(isset($_SESSION['apaneluser']))
 {
     header('Content-type: text/html; charset=UTF-8');
@@ -17,12 +18,12 @@ else
 
 	<head>
 		 
-		<title>Whitelist Unapproved Users | iCarey.net</title>
+		<title>Whitelist Unapproved Users | <?php echo $config['website']['website_name'];?></title>
 		<meta http-equiv="content-type" content="text/html" />
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="author" content="Ian Carey">
-		<meta name="description" content="iCarey.net Survival Minecraft Server">
+		<meta name="description" content="<?php echo $config['website']['website_name'];?> Survival Minecraft Server">
 		<meta name="keywords" content="">
 		
 		<!-- Favicon 
@@ -103,7 +104,7 @@ else
 <?php
 if (isset($_GET['notice']))
 {
-  $notice = $_GET['notice'];
+  $notice = htmlentities($_GET['notice']);
   echo '<div class="alert alert-warning" role="regwarning">';
   echo '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> ';
   echo '<span class="sr-only">Error:</span>';
@@ -113,10 +114,10 @@ if (isset($_GET['notice']))
 }
         if (isset($_GET['approved']))
         {
-            $res = $_GET['approved'];
-            $id = $_GET['id'];
-			$mail = $_GET['email'];
-			$user = $_GET['userign'];
+            $res = htmlentities($_GET['approved']);
+            $id = htmlentities($_GET['id']);
+			$mail = htmlentities($_GET['email']);
+			$user = htmlentities($_GET['userign']);
             if ($res == "1")
             {
                 Approve($id, $config['minecraft']['ip'], $config['minecraft']['rpass'], $config['minecraft']['rport'], $mail, $config['minecraft']['sendmail']);
@@ -138,46 +139,44 @@ if (isset($_GET['notice']))
   echo '</div>';
             }
         }
-        if ($db)
-        {
-
-        }
-        else
-        {
-            echo '<div class="alert alert-warning" role="dbwarning">';
-				echo '<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>';
-				echo '<span class="sr-only">Warning:</span>';
-				echo '<strong>  Warning!</strong> Could not connect to database!';
-  echo '<a href="#" class="close" data-dismiss="alert">&times;</a>';
-  echo '</div>';
-        }
 ?>
 
 <div class="row">
 		<div class="col-md-8">
-			<h1 class="pagetitle">iCarey.net Whitelist Unapproved Users</h1>
+			<h1 class="pagetitle"><?php echo $config['website']['website_name'];?> Whitelist Unapproved Users</h1>
 		</div>
 	</div>
 	<div class="row">
 <!-- Approved User List Column -->
 		<div class="col-md-8">
 <?php
-            $select = "SELECT * FROM whitelist WHERE approved='2'";
-            $result = mysql_query($select);
-            while ($row = mysql_fetch_assoc($result)){
-            $userid = $row['id'];
-			$userign = $row['username'];
-            $comment = $row['comment'];
-			$mail = $row['email'];
-            $text = $comment;
-			echo '<div class="well">';
-			echo '<table class="table">';
-			echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th> </tr></thead>';
-			echo '<tbody> <tr> <td>' . $row['username'] . '</td><td>' . $row['age'] . '</td><td>' . $row['email'] . '</td></tr> </tbody>';
-			echo '</table>';
-			echo '<div class="well">' . $text . '</div>';
-			echo '<center><a href="index.php?approved=1&id='.$userid.'&email='.$mail.'&userign='.$userign.'"><button class="btn-success">Add to server whitelist!</button></a>';
-			echo '</div>';
+			$two = "2";
+            $select = "SELECT * FROM whitelist WHERE approved=:two";
+            $prep = $dbh->prepare($select);
+            $prep->bindparam(":two",$two,PDO::PARAM_INT);
+            $prep->execute();
+            if($prep->rowcount() == "0")
+            {
+            	echo '<p>No unapproved users.</p>';
+            }
+            else
+            {
+            	foreach($prep->fetchall() as $row)
+            	{
+            		$userid = $row['id'];
+					$userign = $row['username'];
+		            $comment = $row['comment'];
+					$mail = $row['email'];
+		            $text = $comment;
+		            echo '<div class="well">';
+					echo '<table class="table">';
+					echo '<thead> <tr> <th>Username</th><th>Age</th><th>Email</th> </tr></thead>';
+					echo '<tbody> <tr> <td>' . $row['username'] . '</td><td>' . $row['age'] . '</td><td>' . $row['email'] . '</td></tr> </tbody>';
+					echo '</table>';
+					echo '<div class="well">' . $text . '</div>';
+					echo '<center><a href="index.php?approved=1&id='.$userid.'&email='.$mail.'&userign='.$userign.'"><button class="btn-success">Add to server whitelist!</button></a>';
+					echo '</div>';
+            	}
             }
 ?>
 	</div>
