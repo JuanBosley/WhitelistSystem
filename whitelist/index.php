@@ -2,8 +2,8 @@
 <?php
 include ('../includes/db_connect.php');
 $config = parse_ini_file('../includes/config.ini.php', 1, true);
-include ('../includes/function_approve.php');
-
+include ('../functions/function_approve.php');
+include ('../functions/function_deny.php');
 if(isset($_SESSION['apaneluser']))
 {
     header('Content-type: text/html; charset=UTF-8');
@@ -204,8 +204,7 @@ if (isset($_GET['notice']))
 	</div>
 <div id="footer" class="">
     <div class="container">
-        <p><?php echo $config['website']['website_name'];?> &copy;2010-2015 - All rights reserved <a href="<?php echo $config['website']['domain'];?>" class=""><?php echo $config['website']['website_name'];?></a>
-        </p>
+    	<p>iCarey.net &copy;2010-2015 - All rights reserved<a href="https://www.icarey.net" class=""> iCarey.net</a></p>
     </div>
 </div>
 	<!-- Bootstrap core JavaScript
